@@ -135,13 +135,13 @@ end
 function M.source(out, scan)
     for _, u in ipairs(scan.unwrapped) do
         add(out, u.path, u.line, "S1", M.WARN,
-            "String does not pass through EllesmereUI.L() and cannot be "
-            .. "translated.")
+            "This text goes to the screen with no EllesmereUI.L() call, thus "
+            .. "nobody can translate it.")
     end
     for _, c in ipairs(scan.concat) do
         add(out, c.path, c.line, "S3", M.WARN,
-            "EllesmereUI.L() receives a concatenated expression, thus the key "
-            .. "is not stable.")
+            "Part of this text comes from a variable, thus no locale file "
+            .. "can contain the finished sentence.")
     end
 end
 
@@ -214,18 +214,18 @@ function M.catalog(out, cat, sourceKeys)
                 end
                 if over then
                     add(out, cat.path, e.line, "L2", M.ERROR,
-                        "Translation needs more format arguments than the English "
-                        .. "key supplies; string.format will raise: " .. short(e.key))
+                        "The translation uses more %s or %d places than the "
+                        .. "English text gives it: " .. short(e.key))
                 elseif not sameCounts(sk, sv) then
                     add(out, cat.path, e.line, "L2b", M.INFO,
-                        "Translation uses fewer format arguments than the English "
-                        .. "key; the extras are ignored: " .. short(e.key))
+                        "The translation uses fewer %s or %d places than the "
+                        .. "English text gives it: " .. short(e.key))
                 end
 
                 if not sameCounts(positions(e.key), positions(e.value)) then
                     add(out, cat.path, e.line, "L3", M.WARN,
-                        "Positional specifiers differ from the English key, so "
-                        .. "argument order is not preserved: " .. short(e.key))
+                        "The numbered places such as %1$s do not match the "
+                        .. "English text: " .. short(e.key))
                 end
 
                 if find(e.key, "|", 1, true)
@@ -264,8 +264,8 @@ function M.catalog(out, cat, sourceKeys)
 
                 if not sourceKeys[e.key] and foreign(e.key) then
                     add(out, cat.path, e.line, "L1", M.WARN,
-                        "Key contains translated text and matches no source "
-                        .. "string; translate the value, not the key: "
+                        "The left side is not English text that the addon "
+                        .. "uses. Translate the right side instead: "
                         .. short(e.key))
                 end
             end
