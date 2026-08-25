@@ -16,20 +16,19 @@ M.CHECKS = {
         scope = "line",
         name = "UnwrappedString",
         level = M.WARN,
-        summary = "The code sends a literal to :SetText() and does not use "
-            .. "EllesmereUI.L().",
-        help = "You cannot translate this string. Use "
-            .. "obj:SetText(EllesmereUI.L(\"...\")).",
+        summary = "This text goes to the screen with no translation step.",
+        help = "Give the text to EllesmereUI.L() before SetText() receives "
+            .. "it. Then a locale file can replace it.",
     },
     S3 = {
         scope = "line",
         name = "UnstableKey",
         level = M.WARN,
-        summary = "EllesmereUI.L() receives a concatenation with a value that "
-            .. "is not a literal.",
-        help = "The scan cannot find the key, thus no locale file can contain "
-            .. "it. Use EllesmereUI.Lf() with format arguments. As an "
-            .. "alternative, put the full sentence in one literal.",
+        summary = "Part of this text comes from a variable, thus nobody can "
+            .. "translate it.",
+        help = "The finished sentence exists only while the game runs, and a "
+            .. "locale file cannot list it. Keep the sentence in one piece "
+            .. "and put the variable in a %s with EllesmereUI.Lf().",
     },
     S4 = {
         scope = "change",
@@ -45,39 +44,39 @@ M.CHECKS = {
         scope = "line",
         name = "TranslatedKey",
         level = M.WARN,
-        summary = "The key contains translated text and matches no source "
-            .. "string.",
-        help = "This occurs when you use a composed string as a key. Use the "
-            .. "English string as the key. Then translate the value.",
+        summary = "The left side is already in another language, and the "
+            .. "addon never asks for it.",
+        help = "The left side must be the English text that the addon shows. "
+            .. "Put the English on the left and your translation on the right.",
     },
     L2 = {
         scope = "line",
         name = "MissingFormatArgument",
         level = M.ERROR,
-        summary = "The translation needs more format arguments than the "
-            .. "English key supplies.",
-        help = "string.format makes an error when the addon runs. Remove the "
-            .. "extra specifier. As an alternative, use positional specifiers "
-            .. "that agree with the key.",
+        summary = "The translation uses more %s or %d places than the "
+            .. "English text gives it.",
+        help = "The addon stops with an error when it shows this line. "
+            .. "Remove the extra place, or number the places to match the "
+            .. "English text.",
     },
     L2b = {
         scope = "line",
         name = "ExtraFormatArgument",
         level = M.INFO,
-        summary = "The translation uses fewer format arguments than the "
-            .. "English key supplies.",
-        help = "Lua removes the extra arguments. This is frequently correct. "
-            .. "If it is correct, do nothing.",
+        summary = "The translation uses fewer %s or %d places than the "
+            .. "English text gives it.",
+        help = "The values that no place uses do not appear. This is "
+            .. "frequently correct. If it is correct, do nothing.",
     },
     L3 = {
         scope = "line",
         name = "FormatArgumentOrder",
         level = M.WARN,
-        summary = "The positional specifiers do not agree with the English "
-            .. "key.",
-        help = "The order of the arguments changes, thus the values go to the "
-            .. "wrong positions. Change the numbers of the %n$ specifiers to "
-            .. "agree with the key.",
+        summary = "The numbered places such as %1$s do not match the "
+            .. "English text.",
+        help = "Each number chooses which value goes in that place. A wrong "
+            .. "number puts the wrong value in the sentence. Make the "
+            .. "numbers match the English text.",
     },
     L4 = {
         scope = "line",
