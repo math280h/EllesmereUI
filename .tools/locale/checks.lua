@@ -136,7 +136,7 @@ function M.source(out, scan)
     for _, u in ipairs(scan.unwrapped) do
         add(out, u.path, u.line, "S1", M.WARN,
             "String does not pass through EllesmereUI.L() and cannot be "
-            .. "translated: " .. short(u.text))
+            .. "translated.")
     end
     for _, c in ipairs(scan.concat) do
         add(out, c.path, c.line, "S3", M.WARN,
