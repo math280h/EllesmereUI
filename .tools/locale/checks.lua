@@ -140,8 +140,8 @@ function M.source(out, scan)
     end
     for _, c in ipairs(scan.concat) do
         add(out, c.path, c.line, "S3", M.WARN,
-            "EllesmereUI.L() receives a concatenated expression, so the key is "
-            .. "not stable: " .. short(c.text))
+            "EllesmereUI.L() receives a concatenated expression, thus the key "
+            .. "is not stable.")
     end
 end
 
