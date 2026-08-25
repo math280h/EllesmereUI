@@ -135,13 +135,12 @@ end
 function M.source(out, scan)
     for _, u in ipairs(scan.unwrapped) do
         add(out, u.path, u.line, "S1", M.WARN,
-            "This text goes to the screen with no EllesmereUI.L() call, thus "
-            .. "nobody can translate it.")
+            "Text that does not go through EllesmereUI.L() cannot be "
+            .. "translated.")
     end
     for _, c in ipairs(scan.concat) do
         add(out, c.path, c.line, "S3", M.WARN,
-            "Part of this text comes from a variable, thus no locale file "
-            .. "can contain the finished sentence.")
+            "Text that is joined with a variable cannot be translated.")
     end
 end
 
@@ -162,10 +161,9 @@ function M.rename(out, baseScan, scan, catalogs)
         end
         if #holders > 0 then
             add(out, r.origin.path, 0, "S4", M.WARN,
-                "English source string changed or removed; " .. #holders
-                .. " locale(s) still key on the old text and now fall back to "
-                .. "English (" .. table.concat(holders, ", ") .. "): "
-                .. short(r.key))
+                "The English text changed. " .. #holders .. " locale(s) "
+                .. "still use the old text and now show English ("
+                .. table.concat(holders, ", ") .. "): " .. short(r.key))
         end
     end
 end
@@ -174,16 +172,16 @@ function M.catalog(out, cat, sourceKeys)
     -- A chunk that stops at an error keeps the entries before that point. The
     -- checks below run on them.
     if cat.err then
-        add(out, cat.path, 1, "L8", M.ERROR, "File failed to load, so any key "
-            .. "below the failure is unchecked: " .. short(tostring(cat.err)))
+        add(out, cat.path, 1, "L8", M.ERROR, "A file that Lua cannot load "
+            .. "gives no translations: " .. short(tostring(cat.err)))
     end
     if cat.bom then
         add(out, cat.path, 1, "L8", M.ERROR,
-            "File begins with a UTF-8 BOM and must be saved without one.")
+            "A byte order mark at the start stops Lua from loading the file.")
     end
     if not cat.declared and not cat.err then
         add(out, cat.path, 1, "L7", M.ERROR,
-            "No EllesmereUI.RegisterLocale() call found.")
+            "A file with no RegisterLocale() call gives no translations.")
     elseif cat.declared and cat.declared ~= cat.code then
         add(out, cat.path, 1, "L7", M.ERROR,
             "RegisterLocale(\"" .. cat.declared .. "\") does not match the file "
@@ -193,8 +191,8 @@ function M.catalog(out, cat, sourceKeys)
 
     for _, d in ipairs(cat.duplicates) do
         add(out, cat.path, d.line, "L4", M.WARN,
-            "Duplicate key first defined on line " .. d.first
-            .. "; the later value wins: " .. short(d.key))
+            "A key that appears two times keeps only the last translation. "
+            .. "The first is on line " .. d.first .. ": " .. short(d.key))
     end
 
     -- The checks that compare one translation with its English key. A value of
@@ -204,8 +202,8 @@ function M.catalog(out, cat, sourceKeys)
         if type(e.value) == "string" then
             if e.value == "" then
                 add(out, cat.path, e.line, "L5", M.ERROR,
-                    "Empty translation renders as blank text; remove the entry "
-                    .. "or use = true to keep English: " .. short(e.key))
+                    "An empty translation shows no text at all: "
+                    .. short(e.key))
             else
                 local sk, sv = specCounts(e.key), specCounts(e.value)
                 local over = false
@@ -214,26 +212,26 @@ function M.catalog(out, cat, sourceKeys)
                 end
                 if over then
                     add(out, cat.path, e.line, "L2", M.ERROR,
-                        "The translation uses more %s or %d places than the "
-                        .. "English text gives it: " .. short(e.key))
+                        "A translation with more %s or %d places than the "
+                        .. "English text makes the addon stop with an error: "
+                        .. short(e.key))
                 elseif not sameCounts(sk, sv) then
                     add(out, cat.path, e.line, "L2b", M.INFO,
-                        "The translation uses fewer %s or %d places than the "
-                        .. "English text gives it: " .. short(e.key))
+                        "A translation with fewer %s or %d places leaves "
+                        .. "some values out: " .. short(e.key))
                 end
 
                 if not sameCounts(positions(e.key), positions(e.value)) then
                     add(out, cat.path, e.line, "L3", M.WARN,
-                        "The numbered places such as %1$s do not match the "
-                        .. "English text: " .. short(e.key))
+                        "Numbered places that do not match the English text "
+                        .. "put values in the wrong order: " .. short(e.key))
                 end
 
                 if find(e.key, "|", 1, true)
                     and balanced(e.key) and not balanced(e.value) then
                     add(out, cat.path, e.line, "L10", M.ERROR,
-                        "Unbalanced |c and |r color escapes; the color applies "
-                        .. "to the text that renders after this string: "
-                        .. short(e.key))
+                        "A missing |r lets the color continue into the text "
+                        .. "after this string: " .. short(e.key))
                 end
 
                 local kl, kt = match(e.key, "^%s*"), match(e.key, "%s*$")
@@ -241,32 +239,31 @@ function M.catalog(out, cat, sourceKeys)
                 if kl ~= vl or kt ~= vt then
                     if (#kl > 0 and #vl == 0) or (#kt > 0 and #vt == 0) then
                         add(out, cat.path, e.line, "L11", M.WARN,
-                            "Translation drops leading or trailing whitespace the "
-                            .. "English key uses for layout: " .. short(e.key))
+                            "Spaces at the start or the end hold the text "
+                            .. "away from what is next to it: " .. short(e.key))
                     else
                         add(out, cat.path, e.line, "L11b", M.INFO,
-                            "Translation adds leading or trailing whitespace the "
-                            .. "English key does not have: " .. short(e.key))
+                            "Extra spaces at the start or the end move the "
+                            .. "text: " .. short(e.key))
                     end
                 end
 
                 if countPat(e.value, "\n") ~= countPat(e.key, "\n") then
                     add(out, cat.path, e.line, "L12", M.INFO,
-                        "Line-break count differs from the English key: "
-                        .. short(e.key))
+                        "A different number of line breaks can make the text "
+                        .. "too large for its frame: " .. short(e.key))
                 end
 
                 if e.value == e.key then
                     add(out, cat.path, e.line, "L9", M.INFO,
-                        "Translation equals the key; use = true to keep English "
-                        .. "on purpose: " .. short(e.key))
+                        "A translation that repeats the English shows "
+                        .. "English: " .. short(e.key))
                 end
 
                 if not sourceKeys[e.key] and foreign(e.key) then
                     add(out, cat.path, e.line, "L1", M.WARN,
-                        "The left side is not English text that the addon "
-                        .. "uses. Translate the right side instead: "
-                        .. short(e.key))
+                        "A left side that is not English never matches the "
+                        .. "addon text: " .. short(e.key))
                 end
             end
         end
