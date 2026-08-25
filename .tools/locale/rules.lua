@@ -1,12 +1,14 @@
--- The registry of the checks.
+-- The registry of the checks. One entry declares everything about a check, and
+-- a new check needs no other file.
 --
--- scope decides when the guard calls a finding new:
+-- scope decides when the guard calls a finding new. split() in guard.lua reads
+-- it:
 --   line   the change touched the line of the finding
 --   file   the change touched the file (a whole-file finding has no line)
 --   change the change caused the finding, at any line
 --
 -- sarif.lua puts summary in shortDescription, help in help, and both in
--- fullDescription.
+-- fullDescription. summary names the fault, and help says what to do.
 local M = {}
 
 M.ERROR, M.WARN, M.INFO = "error", "warn", "info"
@@ -16,147 +18,129 @@ M.CHECKS = {
         scope = "line",
         name = "UnwrappedString",
         level = M.WARN,
-        summary = "This text goes to the screen with no translation step.",
-        help = "Give the text to EllesmereUI.L() before SetText() receives "
-            .. "it. Then a locale file can replace it.",
+        summary = "Text does not use EllesmereUI.L().",
+        help = "Please use EllesmereUI.L() instead for text that should be "
+            .. "translatable.",
     },
     S3 = {
         scope = "line",
         name = "UnstableKey",
         level = M.WARN,
-        summary = "Part of this text comes from a variable, thus nobody can "
-            .. "translate it.",
-        help = "The finished sentence exists only while the game runs, and a "
-            .. "locale file cannot list it. Keep the sentence in one piece "
-            .. "and put the variable in a %s with EllesmereUI.Lf().",
+        summary = "Text is joined with a variable.",
+        help = "Please keep the sentence in one piece and use "
+            .. "EllesmereUI.Lf() with a %s for the variable.",
     },
     S4 = {
         scope = "change",
         name = "RenamedSourceString",
         level = M.WARN,
-        summary = "Someone changed or deleted an English source string, but "
-            .. "the locale files keep the old text.",
-        help = "The addon shows English for these entries. Change the key in "
-            .. "each EllesmereUILocales/*.lua file. As an alternative, put "
-            .. "back the original text.",
+        summary = "The English text changed, and the locale files keep the "
+            .. "old text.",
+        help = "Please change the left side in each EllesmereUILocales file, "
+            .. "or put the original English text back.",
     },
     L1 = {
         scope = "line",
         name = "TranslatedKey",
         level = M.WARN,
-        summary = "The left side is already in another language, and the "
-            .. "addon never asks for it.",
-        help = "The left side must be the English text that the addon shows. "
-            .. "Put the English on the left and your translation on the right.",
+        summary = "The left side is not English.",
+        help = "Please put the English text on the left and your translation "
+            .. "on the right.",
     },
     L2 = {
         scope = "line",
         name = "MissingFormatArgument",
         level = M.ERROR,
-        summary = "The translation uses more %s or %d places than the "
-            .. "English text gives it.",
-        help = "The addon stops with an error when it shows this line. "
-            .. "Remove the extra place, or number the places to match the "
-            .. "English text.",
+        summary = "The translation has more %s or %d places than the English "
+            .. "text.",
+        help = "Please remove the extra place, or number the places to match "
+            .. "the English text.",
     },
     L2b = {
         scope = "line",
         name = "ExtraFormatArgument",
         level = M.INFO,
-        summary = "The translation uses fewer %s or %d places than the "
-            .. "English text gives it.",
-        help = "The values that no place uses do not appear. This is "
-            .. "frequently correct. If it is correct, do nothing.",
+        summary = "The translation has fewer %s or %d places than the English "
+            .. "text.",
+        help = "Please check that this is deliberate. It is frequently "
+            .. "correct and needs no change.",
     },
     L3 = {
         scope = "line",
         name = "FormatArgumentOrder",
         level = M.WARN,
-        summary = "The numbered places such as %1$s do not match the "
-            .. "English text.",
-        help = "Each number chooses which value goes in that place. A wrong "
-            .. "number puts the wrong value in the sentence. Make the "
-            .. "numbers match the English text.",
+        summary = "The numbered places do not match the English text.",
+        help = "Please make the numbers match the English text.",
     },
     L4 = {
         scope = "line",
         name = "DuplicateKey",
         level = M.WARN,
-        summary = "A locale file gives a value to the same key two times.",
-        help = "Lua keeps the second value, and the first translation does "
-            .. "not load. Remove one of the two entries.",
+        summary = "The same key appears two times.",
+        help = "Please remove one of the two entries.",
     },
     L5 = {
         scope = "line",
         name = "EmptyTranslation",
         level = M.ERROR,
-        summary = "The translation is an empty string.",
-        help = "L() returns the empty string, thus the label shows no text. "
-            .. "Remove the entry. As an alternative, set the value to true to "
-            .. "show English.",
+        summary = "The translation is empty.",
+        help = "Please remove the entry, or set the value to true to show "
+            .. "English.",
     },
     L7 = {
         scope = "file",
         name = "LocaleRegistrationMismatch",
         level = M.ERROR,
-        summary = "RegisterLocale() does not agree with the file name, or the "
-            .. "file does not call it.",
-        help = "A file with no call gives no translation. A call with another "
-            .. "code puts the entries under that locale, thus the wrong "
-            .. "players read them. Give the file name to RegisterLocale().",
+        summary = "RegisterLocale() does not match the file name.",
+        help = "Please give the file name to RegisterLocale(). A file with no "
+            .. "call gives no translations, and a call with another code "
+            .. "sends the entries to that locale.",
     },
     L8 = {
         scope = "file",
         name = "LocaleFileUnreadable",
         level = M.ERROR,
-        summary = "The file has a UTF-8 byte order mark, or Lua cannot load "
-            .. "it.",
-        help = "The guard does not check the keys after the error. Remove the "
-            .. "byte order mark. Then correct the syntax error.",
+        summary = "Lua cannot load the file.",
+        help = "Please remove the byte order mark, and correct the syntax "
+            .. "error. The guard checks no key after the error.",
     },
     L9 = {
         scope = "line",
         name = "UntranslatedValue",
         level = M.INFO,
-        summary = "The translation is the same as the English key.",
-        help = "Translate the value. As an alternative, set the value to true "
-            .. "to show English.",
+        summary = "The translation is the same as the English text.",
+        help = "Please translate the value, or set it to true to keep English "
+            .. "on purpose.",
     },
     L10 = {
         scope = "line",
         name = "UnbalancedColorCode",
         level = M.ERROR,
-        summary = "The translation has a different number of |c and |r codes "
-            .. "than the English key.",
-        help = "The color continues into the text after this string. Add an "
-            .. "|r for each |c.",
+        summary = "The |c and |r color codes do not match.",
+        help = "Please add an |r for each |c.",
     },
     L11 = {
         scope = "line",
         name = "DroppedWhitespace",
         level = M.WARN,
-        summary = "The English key has space characters at the start or the "
-            .. "end, but the translation does not.",
-        help = "These space characters keep the string away from the adjacent "
-            .. "text. Keep them.",
+        summary = "The translation drops spaces that the English text has.",
+        help = "Please keep the spaces that the English text has.",
     },
     L11b = {
         scope = "line",
         name = "AddedWhitespace",
         level = M.INFO,
-        summary = "The translation has space characters that the English key "
-            .. "does not have.",
-        help = "This is sometimes correct. For example, French uses a space "
-            .. "before some punctuation marks.",
+        summary = "The translation adds spaces that the English text does not "
+            .. "have.",
+        help = "Please check that this is deliberate. French, for example, "
+            .. "uses a space before some punctuation marks.",
     },
     L12 = {
         scope = "line",
         name = "LineBreakCount",
         level = M.INFO,
-        summary = "The translation has a different number of line breaks than "
-            .. "the English key.",
-        help = "The string can be too large for its frame. Examine it in the "
-            .. "game.",
+        summary = "The translation has a different number of line breaks.",
+        help = "Please look at this text in the game.",
     },
 }
 
