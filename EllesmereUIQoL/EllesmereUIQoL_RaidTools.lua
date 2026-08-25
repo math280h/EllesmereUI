@@ -202,7 +202,7 @@ local COLLAPSED_ICON_TEX = "Interface\\AddOns\\EllesmereUI\\media\\icons\\raid-t
 -- that the key scanner reads. Each label here is thus a key in
 -- EllesmereUILocales/_keys.txt. See .tools/locale/README.md.
 local SECTIONS = {
-    { key = "Group",   label = "Group & Pull" },
+    { key = "Group",   label = "Group and Pull" },
     { key = "Markers", label = "Markers" },
 }
 

@@ -46,7 +46,7 @@ jobs:
 
           set +e
           lua5.1 .tools/locale/guard.lua $scope \
-            --sarif results.sarif \
+            --sarif results.sarif --sarif-min info \
             --keys EllesmereUILocales/_keys.txt \
             --fail-on error \
             >> "$GITHUB_STEP_SUMMARY"
