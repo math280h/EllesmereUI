@@ -73,6 +73,6 @@ The block is saved to `EllesmereUIDB._localeDump` in
 logout). Paste it into your locale file and fill in the translations.
 
 `EllesmereUILocales/_keys.txt` is a committed, static list of the literal keys (regenerated
-by `.tools/extract-locale-keys.sh`; CI keeps it current). It is a quick offline
+by `.tools/locale/guard.lua --keys`; CI keeps it current). It is a quick offline
 reference, but the in-game `/euiloc` harvester above is the complete source of
 truth because it also captures strings passed to `L()` as variables.

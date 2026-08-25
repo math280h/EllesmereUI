@@ -9,4 +9,5 @@
 # the translations moved into the EllesmereUILocales child addon -- verify with
 # "git check-attr -a EllesmereUILocales/koKR.lua" after any move (empty output
 # means the guard is off).
-EllesmereUILocales/*.lua text working-tree-encoding=UTF-8 eol=LF
+EllesmereUILocales/*.lua text working-tree-encoding=UTF-8 eol=lf
+EllesmereUILocales/_keys.txt text eol=lf

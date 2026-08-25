@@ -1,0 +1,36 @@
+name: Locale guard self-test
+
+on:
+  pull_request:
+    paths:
+      - '.tools/locale/**'
+  push:
+    branches: [main]
+    paths:
+      - '.tools/locale/**'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: locale-guard-selftest-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install Lua
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends lua5.1
+
+      - name: Run the self-test
+        run: lua5.1 .tools/locale/tests.lua
+
+      - name: Check the guard runs against the tree
+        run: lua5.1 .tools/locale/guard.lua --all > /dev/null
