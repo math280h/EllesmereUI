@@ -74,9 +74,14 @@ end
 -- the scan reads it from disk. "git show" runs only for the changed files.
 local function scanBase(root, base, range)
     local scan = source.new()
-    local listed = lines(git(root, string.format(
-        'ls-tree -r --name-only %s -- "*.lua"', base)))
-    if #listed == 0 then return nil end
+    -- ls-tree takes no glob pathspec, thus it lists the whole tree and
+    -- isSource() below does the filtering.
+    local listed = lines(git(root, "ls-tree -r --name-only " .. base))
+    if #listed == 0 then
+        io.stderr:write("the base ", base, " lists no file. S4 and the new "
+            .. "key list are not available.\n")
+        return nil
+    end
 
     local changed = {}
     for _, path in ipairs(lines(git(root, string.format(
