@@ -187,7 +187,8 @@ function M.catalog(out, cat, sourceKeys)
     elseif cat.declared and cat.declared ~= cat.code then
         add(out, cat.path, 1, "L7", M.ERROR,
             "RegisterLocale(\"" .. cat.declared .. "\") does not match the file "
-            .. "name, so the whole file is inert.")
+            .. "name. These entries load under " .. cat.declared .. ", not "
+            .. cat.code .. ".")
     end
 
     for _, d in ipairs(cat.duplicates) do

@@ -102,8 +102,9 @@ M.CHECKS = {
         level = M.ERROR,
         summary = "RegisterLocale() does not agree with the file name, or the "
             .. "file does not call it.",
-        help = "The addon loads no translation from this file. Give the file "
-            .. "name to RegisterLocale().",
+        help = "A file with no call gives no translation. A call with another "
+            .. "code puts the entries under that locale, thus the wrong "
+            .. "players read them. Give the file name to RegisterLocale().",
     },
     L8 = {
         scope = "file",
