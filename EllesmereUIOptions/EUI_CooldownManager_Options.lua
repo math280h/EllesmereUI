@@ -2915,8 +2915,9 @@ initFrame:SetScript("OnEvent", function(self)
     local ST_DEF_R, ST_DEF_G, ST_DEF_B, ST_DEF_A = 0.8, 0.1, 0.1, 1
     local RefreshStackThreshEditor  -- forward decl
 
-    -- Shared explainers; literals live inside the L() calls so extract-locale-keys.sh can
-    -- see them (it only reads string literals passed directly to L/Lf, never variables).
+    -- Shared explainers. Each literal is inside its L() call, thus the key
+    -- scanner reads it. The scanner reads no variable. See
+    -- .tools/locale/README.md.
     local function StackThreshHelpTip()
         return EllesmereUI.L("Color the bar differently at several stack counts. The highest count you have reached wins.")
     end

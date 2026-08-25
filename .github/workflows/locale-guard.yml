@@ -1,0 +1,84 @@
+name: Locale guard
+
+on:
+  pull_request:
+    paths:
+      - '**/*.lua'
+      - '.tools/locale/**'
+  push:
+    branches: [main]
+    paths:
+      - '**/*.lua'
+      - '.tools/locale/**'
+
+permissions:
+  contents: read
+  security-events: write
+
+concurrency:
+  group: locale-guard-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Install Lua
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends lua5.1
+
+      - name: Run the locale guard
+        id: guard
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          if [ -n "$BASE_SHA" ]; then
+            scope="--base $BASE_SHA"
+          else
+            scope="--all"
+          fi
+
+          set +e
+          lua5.1 .tools/locale/guard.lua $scope \
+            --sarif results.sarif \
+            --keys EllesmereUILocales/_keys.txt \
+            --fail-on error \
+            >> "$GITHUB_STEP_SUMMARY"
+          status=$?
+          set -e
+
+          if [ "$status" -gt 1 ]; then
+            echo "::error::The locale guard stopped with exit code $status."
+            exit "$status"
+          fi
+          echo "findings=$status" >> "$GITHUB_OUTPUT"
+
+      - name: Upload the findings
+        uses: github/codeql-action/upload-sarif@ff2f1c621b7f889edc0d3c761ac2e6a3f8cdb0dd # v4.37.7
+        with:
+          sarif_file: results.sarif
+          category: locale-guard
+
+      - name: Check that EllesmereUILocales/_keys.txt is up to date
+        run: |
+          if ! git diff --quiet -- EllesmereUILocales/_keys.txt; then
+            echo "::error::EllesmereUILocales/_keys.txt is not current. Run" \
+                 "'lua5.1 .tools/locale/guard.lua --keys EllesmereUILocales/_keys.txt'" \
+                 "and commit the result."
+            git --no-pager diff --stat -- EllesmereUILocales/_keys.txt
+            exit 1
+          fi
+
+      - name: Check that this change introduced no errors
+        if: steps.guard.outputs.findings == '1'
+        run: |
+          echo "::error::This change introduced a problem with the severity error." \
+               "Refer to the job summary, or to the annotations on the files" \
+               "that changed."
+          exit 1

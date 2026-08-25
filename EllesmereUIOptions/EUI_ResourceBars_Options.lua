@@ -1090,7 +1090,8 @@ initFrame:SetScript("OnEvent", function(self)
         btn:SetScript("OnClick", function(self) formShow(self) end)
         return btn
     end
-    -- The L() literals keep both popup titles in the static locale key list: .tools/extract-locale-keys.sh only sees literal string arguments.
+    -- The L() literals keep both popup titles in the static key list. The
+    -- scanner reads literal arguments only. See .tools/locale/README.md.
     local function AddFormTextBtn(rgn, leftOf, cfgFn, refreshFn)
         return AddFormDisableBtn(rgn, leftOf, cfgFn, refreshFn, "textDisabledForms",
             "Enable/Disable per Form", EllesmereUI.L("Enable/Disable per Form"))

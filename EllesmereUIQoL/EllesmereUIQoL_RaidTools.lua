@@ -198,16 +198,16 @@ local COLLAPSED_ICON_TEX = "Interface\\AddOns\\EllesmereUI\\media\\icons\\raid-t
 -- Canonical section list. Build order, stack order, DB key set, window titles
 -- and unlock-mover labels all derive from this one table.
 --
--- `label` reaches EllesmereUI.L as a variable, which the static key extractor
--- cannot see -- the documented arrangement for exactly this case (see the
--- header of .tools/extract-locale-keys.sh); the in-game /euiloc harvester picks
--- them up, the same way every widget label in the suite is already handled.
+-- label reaches EllesmereUI.L as a variable, but label is also a config field
+-- that the key scanner reads. Each label here is thus a key in
+-- EllesmereUILocales/_keys.txt. See .tools/locale/README.md.
 local SECTIONS = {
     { key = "Group",   label = "Group & Pull" },
     { key = "Markers", label = "Markers" },
 }
 
--- One-window title; reaches L as a variable like the section labels.
+-- One-window title. It reaches EllesmereUI.L as a variable, and no config
+-- field holds it, thus _keys.txt does not contain it.
 local COMBINED_LABEL = "Raid Tools"
 
 -- Prefix for this feature's unlock-mode element keys. Used both to register
